@@ -26,4 +26,20 @@ public class BankAccount {
     public int mobileNo() {
         return this.mobileNo;
     }
+
+    public void addMoney(double amt) {
+        this.balance += amt;
+    }
+
+    public void withdrawMoney(double amt) {
+        this.balance -= amt;
+    }
+
+    public String name() {
+        return this.name;
+    }
+
+    public String email() {
+        return this.email;
+    }
 }

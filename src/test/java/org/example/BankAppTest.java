@@ -26,21 +26,39 @@ class BankAppTest {
         bankingService.withdrawMoney(2000);
         Assertions.assertEquals(3000, bankingService.getAccBalance());
     }
+
     @Test
     void shouldAbleToGetPrintDataForPassbook() {
-        Assertions.assertEquals("Current balance is 5000.0", bankingService.getPassbookPrintData());
+        var printService = new PrintService(account);
+        Assertions.assertEquals("Current balance is 5000.0", printService.getPassbookPrintData());
     }
+
     @Test
     void shouldGetTheLoanInterest() {
-        Assertions.assertEquals(7, bankingService.getLoanInterestPercent("homeLoan"));
-        Assertions.assertEquals(9, bankingService.getLoanInterestPercent("carLoan"));
-        Assertions.assertEquals(12, bankingService.getLoanInterestPercent("personalLoan"));
+        LoanService loanService = new LoanService();
+        Assertions.assertEquals(7, loanService.getInterestPercent("homeLoan"));
+        Assertions.assertEquals(9, loanService.getInterestPercent("carLoan"));
+        Assertions.assertEquals(12, loanService.getInterestPercent("personalLoan"));
     }
 
     @Test
-    void shouldAbleSendOTPToMobile() {
-       Assertions.assertEquals(
-               "OTP send to  number "+account.mobileNo(), bankingService.sendOtp());
+    void shouldAbleSendOTPToMobileWithGreetingsAndDisclaimer() {
+        NotificationService notificationService = new SMSNotificationService(account);
 
+        String expected = String.format(
+                "Hi %s, Please don't share this OTP with anyone. OTP send to your number %s"
+                , account.name(), account.mobileNo());
+
+        Assertions.assertEquals(expected, notificationService.sendOtp());
+    }
+    @Test
+    void shouldAbleSendOTPToEmailWithGreetingsAndDisclaimer() {
+        NotificationService notificationService = new EmailNotificationService(account);
+
+        String expected = String.format(
+                "Hi %s, Please don't share this OTP with anyone. OTP send to your email %s"
+                , account.name(), account.email());
+
+        Assertions.assertEquals(expected, notificationService.sendOtp());
     }
 }
