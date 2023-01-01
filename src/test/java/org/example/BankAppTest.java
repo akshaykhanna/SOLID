@@ -6,30 +6,50 @@ import org.junit.jupiter.api.Test;
 
 class BankAppTest {
 
-    private BankAccount account;
-    private BankingService bankingService;
+    private SavingAccount savingAccount;
+    private WithdrawalBankingService withdrawalBankingService;
+    private FixedDepositAccount fdAccount;
+    private BankingService fixedDepositBankingService;
+    private int fixedDepositedAmount;
+    private int savingDepositedAmount;
 
     @BeforeEach
     void setUp() {
-        account = new BankAccount("ACN123", "John", 999912345, "john@xyz.com");
-        bankingService = new BankingService(account);
-        bankingService.depositMoney(5000);
+        savingAccount = new SavingAccount("ACN123", "John", 999912345, "john@xyz.com");
+        fdAccount = new FixedDepositAccount("ACN123", "John", 999912345, "john@xyz.com");
+        withdrawalBankingService = new WithdrawalBankingService(savingAccount);
+        savingDepositedAmount = 5000;
+        withdrawalBankingService.depositMoney(savingDepositedAmount);
+        fixedDepositBankingService = new BankingService(fdAccount);
+        fixedDepositedAmount = 25000;
+        fixedDepositBankingService.depositMoney(fixedDepositedAmount);
     }
 
     @Test
     void shouldAbleToDepositMoney() {
-        Assertions.assertEquals(5000, bankingService.getAccBalance());
+        Assertions.assertEquals(savingDepositedAmount, withdrawalBankingService.getAccBalance());
+    }
+
+    @Test
+    void shouldAbleToDepositMoneyToFixedDeposit() {
+        Assertions.assertEquals(fixedDepositedAmount, fixedDepositBankingService.getAccBalance());
     }
 
     @Test
     void shouldAbleToWithdrawMoney() {
-        bankingService.withdrawMoney(2000);
-        Assertions.assertEquals(3000, bankingService.getAccBalance());
+        withdrawalBankingService.withdrawMoney(2000);
+        Assertions.assertEquals(3000, withdrawalBankingService.getAccBalance());
+    }
+
+    @Test
+    void shouldNotAbleToWithdrawMoneyFromFixedDeposit() {
+//      fixedDepositBankingService.withdrawMoney(2000); As we cannot withdraw money from fixed deposit
+        Assertions.assertEquals(25000, fixedDepositBankingService.getAccBalance());
     }
 
     @Test
     void shouldAbleToGetPrintDataForPassbook() {
-        var printService = new PrintService(account);
+        var printService = new PrintService(savingAccount);
         Assertions.assertEquals("Current balance is 5000.0", printService.getPassbookPrintData());
     }
 
@@ -43,21 +63,18 @@ class BankAppTest {
 
     @Test
     void shouldAbleSendOTPToMobileWithGreetingsAndDisclaimer() {
-        NotificationService notificationService = new SMSNotificationService(account);
+        NotificationService notificationService = new SMSNotificationService(savingAccount);
 
-        String expected = String.format(
-                "Hi %s, Please don't share this OTP with anyone. OTP send to your number %s"
-                , account.name(), account.mobileNo());
+        String expected = String.format("Hi %s, Please don't share this OTP with anyone. OTP send to your number %s", savingAccount.name(), savingAccount.mobileNo());
 
         Assertions.assertEquals(expected, notificationService.sendOtp());
     }
+
     @Test
     void shouldAbleSendOTPToEmailWithGreetingsAndDisclaimer() {
-        NotificationService notificationService = new EmailNotificationService(account);
+        NotificationService notificationService = new EmailNotificationService(savingAccount);
 
-        String expected = String.format(
-                "Hi %s, Please don't share this OTP with anyone. OTP send to your email %s"
-                , account.name(), account.email());
+        String expected = String.format("Hi %s, Please don't share this OTP with anyone. OTP send to your email %s", savingAccount.name(), savingAccount.email());
 
         Assertions.assertEquals(expected, notificationService.sendOtp());
     }
