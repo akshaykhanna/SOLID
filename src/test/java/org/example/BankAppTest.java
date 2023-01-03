@@ -111,5 +111,23 @@ class BankAppTest {
 
         Assertions.assertEquals(expected, googlePayUPI.payMoney(paidAmount, reciverUPI));
     }
+    @Test
+    void shouldAbleWithdrawMoneyFromATMViaDebitCard() {
+        BankATMService bankATMService = new BankATMService(new DebitCard());
+        double withdrawAmount = 2000.0;
+        String expectedMsg = String.format("Withdrawn %.2f from bank", withdrawAmount);
+        Assertions.assertEquals(expectedMsg, bankATMService.withdrawMoney(withdrawAmount));
+    }
+    @Test
+    void shouldAbleWithdrawMoneyFromATMViaCreditCard() {
+        CreditCard creditCard = new CreditCard();
+        BankATMService bankATMService = new BankATMService(creditCard);
+        double withdrawAmount = 2000.0;
+        double transactionCharge = 500;
+        creditCard.setTransactionCharge(transactionCharge);
+
+        String expectedMsg = String.format("Withdrawn %.2f from bank & have incurred %.2f as transaction charges", withdrawAmount, transactionCharge);
+        Assertions.assertEquals(expectedMsg, bankATMService.withdrawMoney(withdrawAmount));
+    }
 
 }
